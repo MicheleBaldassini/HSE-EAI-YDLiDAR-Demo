@@ -1,0 +1,4 @@
+model,best_params,mean_accuracy
+SVC,"{'C': 841.6147022133499, 'degree': 3.0, 'gamma': 'auto', 'kernel': 'rbf', 'model': 'svm'}",0.9520833333333332
+KNeighborsClassifier,"{'model': 'knn', 'n_neighbors': 4.0, 'p': 1, 'weights': 'distance'}",0.9712500000000001
+DecisionTreeClassifier,"{'criterion': 'gini', 'max_depth': 50, 'min_samples_leaf': 1.0, 'min_samples_split': 3.0, 'model': 'dt'}",0.9691666666666666
