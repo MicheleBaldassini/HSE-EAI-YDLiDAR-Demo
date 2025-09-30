@@ -28,10 +28,10 @@ testset = pd.read_csv(os.path.join(base_path, 'dataset', 'testset.csv'))
 # Define candidate models
 # --------------------------
 models = {
-    "svm": SVC(kernel="rbf", gamma="scale"),
-    "knn": KNeighborsClassifier(n_neighbors=5),
-    # "mlp": MLPClassifier(hidden_layer_sizes=(50,), max_iter=1000, random_state=42),
-    "dt": DecisionTreeClassifier(random_state=42)
+    "SVC": SVC(kernel="rbf", gamma="scale"),
+    "KNeighborsClassifier": KNeighborsClassifier(n_neighbors=5),
+    # "MLPClassifier": MLPClassifier(hidden_layer_sizes=(50,), max_iter=1000, random_state=42),
+    "DecisionTreeClassifier": DecisionTreeClassifier(random_state=42)
 }
 
 results = []
@@ -78,7 +78,7 @@ for name, model in models.items():
     num_folds = 10
     cv = StratifiedKFold(n_splits=num_folds, shuffle=True, random_state=42)
 
-    print(f"Running {name.upper()}...")
+    print(f"Running {name}...")
     accuracies = []
     for i, (train_idx, val_idx) in enumerate(cv.split(X_train, T_train), start=1):
         x_tr, t_tr = X_train[train_idx], T_train[train_idx]
@@ -93,7 +93,7 @@ for name, model in models.items():
 
     mean_acc = np.mean(accuracies)
     results.append({"model": name, "folds": accuracies, "mean_accuracy": mean_acc})
-    print(f"Mean accuracy {name.upper()} = {mean_acc:.4f}")
+    print(f"Mean accuracy {name} = {mean_acc:.4f}")
 
 # --------------------------
 # Save CV results
@@ -113,7 +113,7 @@ cv_df.to_csv(os.path.join(base_path, 'results', "cv_results.csv"), index=False)
 best = max(results, key=lambda r: r["mean_accuracy"])
 best_model_name = best["model"]
 best_model = models[best_model_name]
-print(f"\nBest model: {best_model_name.upper()} with accuracy {best['mean_accuracy']:.4f}")
+print(f"\nBest model: {best_model_name} with accuracy {best['mean_accuracy']:.4f}")
 
 # --------------------------
 # Train best model on full training set
@@ -135,7 +135,7 @@ fig, ax = plt.subplots(1, 1, figsize=(5, 5))
 
 cm = confusion_matrix(T_test, y_pred)
 conf_mat.plot_confusion_matrix(ax, cm, ['a', 'b', 'c', 'd', 'e', 'f'], fontsize=10)
-ax.set_title(f"Confusion Matrix ({best_model_name.upper()})")
+ax.set_title(f"Confusion Matrix ({best_model_name})")
 fig.tight_layout()
 fig.savefig(os.path.join(base_dir, 'fig', f'cm_{best_model_name}.png'))
 plt.close(fig)

@@ -120,7 +120,7 @@ results = []
 best_models = {}
 
 for model_name, space in search_spaces.items():
-    print(f"\n=== Optimizing {model_name.upper()} with Hyperopt ===")
+    print(f"\n=== Optimizing {model_name} with Hyperopt ===")
     # --------------------------
     # Carica risultati feature selection
     # --------------------------
@@ -163,7 +163,7 @@ for model_name, space in search_spaces.items():
     acc = -best_trial["loss"]
     params = best_trial["params"]
 
-    print(f"Best {model_name.upper()} accuracy = {acc:.4f}")
+    print(f"Best {model_name} accuracy = {acc:.4f}")
     print(f"Params = {params}")
 
     results.append({"model": model_name, "mean_accuracy": acc, "best_params": params})
@@ -184,7 +184,7 @@ cv_df.to_csv(os.path.join(base_path, 'results', "hp_results.csv"), index=False)
 best = max(results, key=lambda r: r["mean_accuracy"])
 best_model_name = best["model"]
 best_params = best["best_params"]
-print(f"\nBest model overall: {best_model_name.upper()} with accuracy {best['mean_accuracy']:.4f}")
+print(f"\nBest model overall: {best_model_name} with accuracy {best['mean_accuracy']:.4f}")
 
 # Ricostruisci best_model con parametri trovati
 _ = objective(best_params)  # per rigenerare model identico
@@ -238,7 +238,7 @@ fig, ax = plt.subplots(1, 1, figsize=(5, 5))
 
 cm = confusion_matrix(T_test, y_pred)
 conf_mat.plot_confusion_matrix(ax, cm, ['a', 'b', 'c', 'd', 'e', 'f'], fontsize=10)
-ax.set_title(f"Confusion Matrix ({best_model_name.upper()})")
+ax.set_title(f"Confusion Matrix ({best_model_name})")
 fig.tight_layout()
 plt.draw()
 fig.savefig(os.path.join(base_dir, 'fig', f'cm_{best_model_name}.png'))

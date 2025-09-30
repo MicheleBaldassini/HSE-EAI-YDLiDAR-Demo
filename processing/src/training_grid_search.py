@@ -28,7 +28,7 @@ testset = pd.read_csv(os.path.join(base_path, 'dataset', 'testset.csv'))
 # Define models + param grids
 # --------------------------
 param_grids = {
-    "svm": (
+    "SVC": (
         SVC(),
         {
             "kernel": ["rbf", "linear"],
@@ -36,14 +36,14 @@ param_grids = {
             "gamma": ["scale", "auto"]
         }
     ),
-    "knn": (
+    "KNeighborsClassifier": (
         KNeighborsClassifier(),
         {
             "n_neighbors": [3, 5, 7, 9],
             "weights": ["uniform", "distance"]
         }
     ),
-    # "mlp": (
+    # "MLPClassifier": (
     #     MLPClassifier(max_iter=1000, random_state=42),
     #     {
     #         "hidden_layer_sizes": [(50,), (100,), (50,50)],
@@ -51,7 +51,7 @@ param_grids = {
     #         "alpha": [0.0001, 0.001]
     #     }
     # ),
-    "dt": (
+    "DecisionTreeClassifier": (
         DecisionTreeClassifier(random_state=42),
         {
             "criterion": ["gini", "entropy"],
@@ -68,7 +68,7 @@ results = []
 cv = StratifiedKFold(n_splits=10, shuffle=True, random_state=42)
 
 for name, (model, grid) in param_grids.items():
-    print(f"\nRunning {name.upper()} with GridSearchCV...")
+    print(f"\nRunning {name} with GridSearchCV...")
 
     # --------------------------
     # Carica risultati feature selection
@@ -112,8 +112,8 @@ for name, (model, grid) in param_grids.items():
     best_params = gridsearch.best_params_
     best_acc = gridsearch.best_score_
 
-    print(f"Best {name.upper()} params: {best_params}")
-    print(f"Best {name.upper()} CV accuracy: {best_acc:.4f}")
+    print(f"Best {name} params: {best_params}")
+    print(f"Best {name} CV accuracy: {best_acc:.4f}")
 
     results.append({
         "model": name,
@@ -141,7 +141,7 @@ best = max(results, key=lambda r: r["mean_accuracy"])
 best_model_name = best["model"]
 best_model = best["estimator"]
 
-print(f"\nBest model overall: {best_model_name.upper()} with accuracy {best['mean_accuracy']:.4f}")
+print(f"\nBest model overall: {best_model_name} with accuracy {best['mean_accuracy']:.4f}")
 
 # --------------------------
 # Train best model on full training set
@@ -163,7 +163,7 @@ fig, ax = plt.subplots(1, 1, figsize=(5, 5))
 
 cm = confusion_matrix(T_test, y_pred)
 conf_mat.plot_confusion_matrix(ax, cm, ['a', 'b', 'c', 'd', 'e', 'f'], fontsize=10)
-ax.set_title(f"Confusion Matrix ({best_model_name.upper()})")
+ax.set_title(f"Confusion Matrix ({best_model_name})")
 fig.tight_layout()
 plt.draw()
 fig.savefig(os.path.join(base_dir, 'fig', f'cm_{best_model_name}.png'))
