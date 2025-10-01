@@ -1,4 +1,4 @@
 model,best_params,mean_accuracy
-svm,"{'C': 10, 'gamma': 'auto', 'kernel': 'rbf'}",0.8870833333333332
-knn,"{'n_neighbors': 3, 'weights': 'distance'}",0.9704166666666666
-dt,"{'criterion': 'entropy', 'max_depth': None}",0.9758333333333333
+SVC,"{'C': 10, 'gamma': 'auto', 'kernel': 'rbf'}",0.8870833333333332
+KNeighborsClassifier,"{'n_neighbors': 3, 'weights': 'distance'}",0.9704166666666666
+DecisionTreeClassifier,"{'criterion': 'entropy', 'max_depth': None}",0.9758333333333333
