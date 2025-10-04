@@ -28,34 +28,34 @@ testset = pd.read_csv(os.path.join(base_path, 'dataset', 'testset.csv'))
 # Define models + param grids
 # --------------------------
 param_grids = {
-    "SVC": (
+    'SVC': (
         SVC(),
         {
-            "kernel": ["rbf", "linear"],
-            "C": [0.1, 1, 10],
-            "gamma": ["scale", "auto"]
+            'kernel': ['rbf', 'linear'],
+            'C': [0.1, 1, 10],
+            'gamma': ['scale', 'auto']
         }
     ),
-    "KNeighborsClassifier": (
+    'KNeighborsClassifier': (
         KNeighborsClassifier(),
         {
-            "n_neighbors": [3, 5, 7, 9],
-            "weights": ["uniform", "distance"]
+            'n_neighbors': [3, 5, 7, 9],
+            'weights': ['uniform', 'distance']
         }
     ),
-    # "MLPClassifier": (
+    # 'MLPClassifier': (
     #     MLPClassifier(max_iter=1000, random_state=42),
     #     {
-    #         "hidden_layer_sizes": [(50,), (100,), (50,50)],
-    #         "activation": ["relu", "tanh"],
-    #         "alpha": [0.0001, 0.001]
+    #         'hidden_layer_sizes': [(50,), (100,), (50,50)],
+    #         'activation': ['relu', 'tanh'],
+    #         'alpha': [0.0001, 0.001]
     #     }
     # ),
-    "DecisionTreeClassifier": (
+    'DecisionTreeClassifier': (
         DecisionTreeClassifier(random_state=42),
         {
-            "criterion": ["gini", "entropy"],
-            "max_depth": [None, 5, 10, 20]
+            'criterion': ['gini', 'entropy'],
+            'max_depth': [None, 5, 10, 20]
         }
     )
 }
@@ -68,14 +68,14 @@ results = []
 cv = StratifiedKFold(n_splits=10, shuffle=True, random_state=42)
 
 for name, (model, grid) in param_grids.items():
-    print(f"\nRunning {name} with GridSearchCV...")
+    print(f'\nRunning {name} with GridSearchCV...')
 
     # --------------------------
     # Carica risultati feature selection
     # --------------------------
-    sequential_fs = load(os.path.join(base_path, 'results', f"sequential_fs_{model.__class__.__name__}.joblib"))
+    sequential_fs = load(os.path.join(base_path, 'results', f'sequential_fs_{model.__class__.__name__}.joblib'))
 
-    D = np.vstack([r["fs"] for r in sequential_fs])
+    D = np.vstack([r['fs'] for r in sequential_fs])
     s = np.sum(D, axis=0)
 
     # Ordina feature per importanza (decrescente)
@@ -91,7 +91,7 @@ for name, (model, grid) in param_grids.items():
         else:
             break
 
-    print("Selected features:", selected_features)
+    print('Selected features:', selected_features)
 
     X_train = trainset.iloc[:, selected_features].values
     T_train = trainset.iloc[:, -1].values - 1
@@ -103,7 +103,7 @@ for name, (model, grid) in param_grids.items():
         model,
         param_grid=grid,
         cv=cv,
-        scoring="accuracy",
+        scoring='accuracy',
         n_jobs=-1
     )
     gridsearch.fit(X_train, T_train)
@@ -112,34 +112,34 @@ for name, (model, grid) in param_grids.items():
     best_params = gridsearch.best_params_
     best_acc = gridsearch.best_score_
 
-    print(f"Best {name} params: {best_params}")
-    print(f"Best {name} CV accuracy: {best_acc:.4f}")
+    print(f'Best {name} params: {best_params}')
+    print(f'Best {name} CV accuracy: {best_acc:.4f}')
 
     results.append({
-        "model": name,
-        "best_params": best_params,
-        "mean_accuracy": best_acc,
-        "estimator": best_model
+        'model': name,
+        'best_params': best_params,
+        'mean_accuracy': best_acc,
+        'estimator': best_model
     })
 
 # --------------------------
 # Save CV results
 # --------------------------
 cv_df = pd.DataFrame([{
-    "model": r["model"],
-    "best_params": r["best_params"],
-    "mean_accuracy": r["mean_accuracy"]
+    'model': r['model'],
+    'best_params': r['best_params'],
+    'mean_accuracy': r['mean_accuracy']
 } for r in results])
 
-cv_df.to_csv(os.path.join(base_path, 'results', "cv_results.csv"), index=False)
-print("GridSearch results saved to cv_results.csv")
+cv_df.to_csv(os.path.join(base_path, 'results', 'cv_results.csv'), index=False)
+print('GridSearch results saved to cv_results.csv')
 
 # --------------------------
 # Select best model
 # --------------------------
-best = max(results, key=lambda r: r["mean_accuracy"])
-best_model_name = best["model"]
-best_model = best["estimator"]
+best = max(results, key=lambda r: r['mean_accuracy'])
+best_model_name = best['model']
+best_model = best['estimator']
 
 print(f"\nBest model overall: {best_model_name} with accuracy {best['mean_accuracy']:.4f}")
 
@@ -147,23 +147,23 @@ print(f"\nBest model overall: {best_model_name} with accuracy {best['mean_accura
 # Train best model on full training set
 # --------------------------
 best_model.fit(X_train, T_train)
-dump(best_model, os.path.join(base_path, "results", "best_model.pth"))
+dump(best_model, os.path.join(base_path, 'results', 'best_model.pth'))
 
-best_model = load(os.path.join(base_path, "results", "best_model.pth"))
+best_model = load(os.path.join(base_path, 'results', 'best_model.pth'))
 # --------------------------
 # Test the best model
 # --------------------------
 y_score = best_model.predict_proba(X_test)
 y_pred = np.argmax(y_score, axis=-1)
 test_acc = accuracy_score(T_test, y_pred)
-print(f"Test accuracy = {test_acc:.4f}")
+print(f'Test accuracy = {test_acc:.4f}')
 
 
 fig, ax = plt.subplots(1, 1, figsize=(5, 5))
 
 cm = confusion_matrix(T_test, y_pred)
 conf_mat.plot_confusion_matrix(ax, cm, ['a', 'b', 'c', 'd', 'e', 'f'], fontsize=10)
-ax.set_title(f"Confusion Matrix ({best_model_name})")
+ax.set_title(f'Confusion Matrix ({best_model_name})')
 fig.tight_layout()
 plt.draw()
 fig.savefig(os.path.join(base_dir, 'fig', f'cm_{best_model_name}.png'))
@@ -203,5 +203,5 @@ plt.close(fig)
 # --------------------------
 # Reload model example
 # --------------------------
-reloaded_model = load(os.path.join(base_path, "results", "best_model.pth"))
-print("Reloaded model type:", type(reloaded_model))
+reloaded_model = load(os.path.join(base_path, 'results', 'best_model.pth'))
+print('Reloaded model type:', type(reloaded_model))

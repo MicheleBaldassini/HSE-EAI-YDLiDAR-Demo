@@ -28,10 +28,10 @@ testset = pd.read_csv(os.path.join(base_path, 'dataset', 'testset.csv'))
 # Define candidate models
 # --------------------------
 models = {
-    "SVC": SVC(kernel="rbf", gamma="scale"),
-    "KNeighborsClassifier": KNeighborsClassifier(n_neighbors=5),
-    # "MLPClassifier": MLPClassifier(hidden_layer_sizes=(50,), max_iter=1000, random_state=42),
-    "DecisionTreeClassifier": DecisionTreeClassifier(random_state=42)
+    'SVC': SVC(kernel='rbf', gamma='scale'),
+    'KNeighborsClassifier': KNeighborsClassifier(n_neighbors=5),
+    # 'MLPClassifier': MLPClassifier(hidden_layer_sizes=(50,), max_iter=1000, random_state=42),
+    'DecisionTreeClassifier': DecisionTreeClassifier(random_state=42)
 }
 
 results = []
@@ -43,9 +43,9 @@ for name, model in models.items():
     # --------------------------
     # Carica risultati feature selection
     # --------------------------
-    sequential_fs = load(os.path.join(base_path, 'results', f"sequential_fs_{model.__class__.__name__}.joblib"))
+    sequential_fs = load(os.path.join(base_path, 'results', f'sequential_fs_{model.__class__.__name__}.joblib'))
 
-    D = np.vstack([r["fs"] for r in sequential_fs])
+    D = np.vstack([r['fs'] for r in sequential_fs])
     s = np.sum(D, axis=0)
 
     # Ordina feature per importanza (decrescente)
@@ -78,7 +78,7 @@ for name, model in models.items():
     num_folds = 10
     cv = StratifiedKFold(n_splits=num_folds, shuffle=True, random_state=42)
 
-    print(f"Running {name}...")
+    print(f'Running {name}...')
     accuracies = []
     for i, (train_idx, val_idx) in enumerate(cv.split(X_train, T_train), start=1):
         x_tr, t_tr = X_train[train_idx], T_train[train_idx]
@@ -89,29 +89,29 @@ for name, model in models.items():
 
         acc = accuracy_score(t_val, y_val)
         accuracies.append(acc)
-        print(f"  Fold {i}: accuracy = {acc:.4f}")
+        print(f'  Fold {i}: accuracy = {acc:.4f}')
 
     mean_acc = np.mean(accuracies)
-    results.append({"model": name, "folds": accuracies, "mean_accuracy": mean_acc})
-    print(f"Mean accuracy {name} = {mean_acc:.4f}")
+    results.append({'model': name, 'folds': accuracies, 'mean_accuracy': mean_acc})
+    print(f'Mean accuracy {name} = {mean_acc:.4f}')
 
 # --------------------------
 # Save CV results
 # --------------------------
 rows = []
 for res in results:
-    for fold, acc in enumerate(res["folds"], start=1):
-        rows.append({"model": res["model"], "fold": fold, "accuracy": acc})
-    rows.append({"model": res["model"], "fold": "mean", "accuracy": res["mean_accuracy"]})
+    for fold, acc in enumerate(res['folds'], start=1):
+        rows.append({'model': res['model'], 'fold': fold, 'accuracy': acc})
+    rows.append({'model': res['model'], 'fold': 'mean', 'accuracy': res['mean_accuracy']})
 
 cv_df = pd.DataFrame(rows)
-cv_df.to_csv(os.path.join(base_path, 'results', "cv_results.csv"), index=False)
+cv_df.to_csv(os.path.join(base_path, 'results', 'cv_results.csv'), index=False)
 
 # --------------------------
 # Select best model
 # --------------------------
-best = max(results, key=lambda r: r["mean_accuracy"])
-best_model_name = best["model"]
+best = max(results, key=lambda r: r['mean_accuracy'])
+best_model_name = best['model']
 best_model = models[best_model_name]
 print(f"\nBest model: {best_model_name} with accuracy {best['mean_accuracy']:.4f}")
 
@@ -119,23 +119,23 @@ print(f"\nBest model: {best_model_name} with accuracy {best['mean_accuracy']:.4f
 # Train best model on full training set
 # --------------------------
 best_model.fit(X_train, T_train)
-dump(best_model, os.path.join(base_path, "results", "best_model.pth"))
+dump(best_model, os.path.join(base_path, 'results', 'best_model.pth'))
 
-best_model = load(os.path.join(base_path, "results", "best_model.pth"))
+best_model = load(os.path.join(base_path, 'results', 'best_model.pth'))
 # --------------------------
 # Test the best model
 # --------------------------
 y_score = best_model.predict_proba(X_test)
 y_pred = np.argmax(y_score, axis=-1)
 test_acc = accuracy_score(T_test, y_pred)
-print(f"Test accuracy = {test_acc:.4f}")
+print(f'Test accuracy = {test_acc:.4f}')
 
 # Confusion matrix
 fig, ax = plt.subplots(1, 1, figsize=(5, 5))
 
 cm = confusion_matrix(T_test, y_pred)
 conf_mat.plot_confusion_matrix(ax, cm, ['a', 'b', 'c', 'd', 'e', 'f'], fontsize=10)
-ax.set_title(f"Confusion Matrix ({best_model_name})")
+ax.set_title(f'Confusion Matrix ({best_model_name})')
 fig.tight_layout()
 fig.savefig(os.path.join(base_dir, 'fig', f'cm_{best_model_name}.png'))
 plt.close(fig)
@@ -173,5 +173,5 @@ plt.close(fig)
 # --------------------------
 # Reload model example
 # --------------------------
-reloaded_model = load(os.path.join(base_path, "results", "best_model.pth"))
-print("Reloaded model type:", type(reloaded_model))
+reloaded_model = load(os.path.join(base_path, 'results', 'best_model.pth'))
+print('Reloaded model type:', type(reloaded_model))

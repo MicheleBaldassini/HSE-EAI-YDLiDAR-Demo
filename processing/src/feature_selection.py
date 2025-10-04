@@ -41,63 +41,63 @@ X_train, X_test, T_train, T_test = train_test_split(
 trainset = pd.concat([X_train, T_train], axis=1)
 testset = pd.concat([X_test, T_test], axis=1)
 
-trainset.to_csv(os.path.join(base_path, 'dataset', "trainset.csv"), index=False)
-testset.to_csv(os.path.join(base_path, 'dataset', "testset.csv"), index=False)
+trainset.to_csv(os.path.join(base_path, 'dataset', 'trainset.csv'), index=False)
+testset.to_csv(os.path.join(base_path, 'dataset', 'testset.csv'), index=False)
 
 # --------------------------
 # Feature selection function
 # --------------------------
 def feature_selection(X, T, model, niter=30):
-    """Run sequential forward selection multiple times."""
+    '''Run sequential forward selection multiple times.'''
     res = []
     cv = StratifiedKFold(n_splits=10, shuffle=True, random_state=42)
 
     for _ in range(niter):
         sfs = SequentialFeatureSelector(
             model,
-            n_features_to_select="auto",
-            direction="forward",
-            scoring="accuracy",
+            n_features_to_select='auto',
+            direction='forward',
+            scoring='accuracy',
             cv=cv,
             n_jobs=-1
         )
         sfs.fit(X, T)
         fs = sfs.get_support()
-        res.append({"fs": fs})
+        res.append({'fs': fs})
     return res
 
 # --------------------------
 # Define models
 # --------------------------
 models = {
-    "svm": SVC(kernel="rbf", gamma="scale"),
-    "knn": KNeighborsClassifier(n_neighbors=5),
-    # "mlp": MLPClassifier(hidden_layer_sizes=(50,), max_iter=1000, random_state=42),
-    "dt": DecisionTreeClassifier(random_state=42)
+    'svm': SVC(kernel='rbf', gamma='scale'),
+    'knn': KNeighborsClassifier(n_neighbors=5),
+    # 'mlp': MLPClassifier(hidden_layer_sizes=(50,), max_iter=1000, random_state=42),
+    'dt': DecisionTreeClassifier(random_state=42)
 }
 
 niter = 1
 
 for name, model in models.items():
-    print(f"Running feature selection with {name.upper()}...")
+    print(f'Running feature selection with {name.upper()}...')
     sequential_fs = feature_selection(X_train.values, T_train, model, niter=niter)
 
     # Save results
-    dump(sequential_fs, os.path.join(results_path, f"sequential_fs_{model.__class__.__name__}.joblib"))
+    dump(sequential_fs, os.path.join(results_path, f'sequential_fs_{model.__class__.__name__}.joblib'))
 
     # --------------------------
     # Plot bar
     # --------------------------
-    D = np.vstack([r["fs"] for r in sequential_fs])
+    D = np.vstack([r['fs'] for r in sequential_fs])
     s = np.sum(D, axis=0)
 
     fig, ax = plt.subplots(1, 1, figsize=(10, 5))
     ax.bar(range(1, len(s) + 1), s)
     ax.set_xticks(range(1, len(s) + 1))
     ax.set_yticks(range(1, int(np.max(s)) + 1))
-    ax.set_xlabel("Feature index")
-    ax.set_ylabel("Selection count")
-    ax.set_title(f"Sequential Feature Selection ({name.upper()})")
+    ax.set_xlabel('Feature index')
+    ax.set_ylabel('Selection count')
+    ax.set_title(f'Sequential Feature Selection ({name.upper()})')
     fig.tight_layout()
-    fig.savefig(os.path.join(base_path, 'fig', f"sequential_fs_{name}.png"), dpi=300)
+    fig.savefig(os.path.join(base_path, 'fig', f'sequential_fs_{name}.png'), dpi=300)
     plt.close(fig)

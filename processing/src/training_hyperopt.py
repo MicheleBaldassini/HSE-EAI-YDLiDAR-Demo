@@ -30,39 +30,39 @@ testset = pd.read_csv(os.path.join(base_path, 'dataset', 'testset.csv'))
 # Definizione search space
 # --------------------------
 search_spaces = {
-    "SVC": hp.choice("svm", [
+    'SVC': hp.choice('svm', [
         {
-            "model": "svm",
-            "C": hp.loguniform("svm_C", np.log(1e-3), np.log(1e3)),
-            "kernel": hp.choice("svm_kernel", ["linear", "rbf", "poly"]),
-            "gamma": hp.choice("svm_gamma", ["scale", "auto"]),
-            "degree": hp.quniform("svm_degree", 2, 5, 1)
+            'model': 'svm',
+            'C': hp.loguniform('svm_C', np.log(1e-3), np.log(1e3)),
+            'kernel': hp.choice('svm_kernel', ['linear', 'rbf', 'poly']),
+            'gamma': hp.choice('svm_gamma', ['scale', 'auto']),
+            'degree': hp.quniform('svm_degree', 2, 5, 1)
         }
     ]),
-    "KNeighborsClassifier": hp.choice("knn", [
+    'KNeighborsClassifier': hp.choice('knn', [
         {
-            "model": "knn",
-            "n_neighbors": hp.quniform("knn_n_neighbors", 3, 30, 1),
-            "weights": hp.choice("knn_weights", ["uniform", "distance"]),
-            "p": hp.choice("knn_p", [1, 2])  # manhattan o euclidea
+            'model': 'knn',
+            'n_neighbors': hp.quniform('knn_n_neighbors', 3, 30, 1),
+            'weights': hp.choice('knn_weights', ['uniform', 'distance']),
+            'p': hp.choice('knn_p', [1, 2])  # manhattan o euclidea
         }
     ]),
-    # "MLPClassifier": hp.choice("mlp", [
+    # 'MLPClassifier': hp.choice('mlp', [
     #     {
-    #         "model": "mlp",
-    #         "hidden_layer_sizes": hp.choice("mlp_hidden", [(50,), (100,), (50,50), (100,50)]),
-    #         "activation": hp.choice("mlp_activation", ["relu", "tanh", "logistic"]),
-    #         "alpha": hp.loguniform("mlp_alpha", np.log(1e-5), np.log(1e-1)),
-    #         "learning_rate_init": hp.loguniform("mlp_lr", np.log(1e-4), np.log(1e-1))
+    #         'model': 'mlp',
+    #         'hidden_layer_sizes': hp.choice('mlp_hidden', [(50,), (100,), (50,50), (100,50)]),
+    #         'activation': hp.choice('mlp_activation', ['relu', 'tanh', 'logistic']),
+    #         'alpha': hp.loguniform('mlp_alpha', np.log(1e-5), np.log(1e-1)),
+    #         'learning_rate_init': hp.loguniform('mlp_lr', np.log(1e-4), np.log(1e-1))
     #     }
     # ]),
-    "DecisionTreeClassifier": hp.choice("dt", [
+    'DecisionTreeClassifier': hp.choice('dt', [
         {
-            "model": "dt",
-            "criterion": hp.choice("dt_criterion", ["gini", "entropy"]),
-            "max_depth": hp.choice("dt_max_depth", [None, 5, 10, 20, 50]),
-            "min_samples_split": hp.quniform("dt_min_split", 2, 20, 1),
-            "min_samples_leaf": hp.quniform("dt_min_leaf", 1, 10, 1)
+            'model': 'dt',
+            'criterion': hp.choice('dt_criterion', ['gini', 'entropy']),
+            'max_depth': hp.choice('dt_max_depth', [None, 5, 10, 20, 50]),
+            'min_samples_split': hp.quniform('dt_min_split', 2, 20, 1),
+            'min_samples_leaf': hp.quniform('dt_min_leaf', 1, 10, 1)
         }
     ])
 }
@@ -71,47 +71,47 @@ search_spaces = {
 # Funzione obiettivo
 # --------------------------
 def objective(params):
-    model_type = params["model"]
+    model_type = params['model']
 
-    if model_type == "svm":
+    if model_type == 'svm':
         model = SVC(
-            C=params["C"],
-            kernel=params["kernel"],
-            gamma=params["gamma"],
-            degree=int(params["degree"]),
+            C=params['C'],
+            kernel=params['kernel'],
+            gamma=params['gamma'],
+            degree=int(params['degree']),
             probability=False
         )
-    elif model_type == "knn":
+    elif model_type == 'knn':
         model = KNeighborsClassifier(
-            n_neighbors=int(params["n_neighbors"]),
-            weights=params["weights"],
-            p=params["p"]
+            n_neighbors=int(params['n_neighbors']),
+            weights=params['weights'],
+            p=params['p']
         )
-    elif model_type == "mlp":
+    elif model_type == 'mlp':
         model = MLPClassifier(
-            hidden_layer_sizes=params["hidden_layer_sizes"],
-            activation=params["activation"],
-            alpha=params["alpha"],
-            learning_rate_init=params["learning_rate_init"],
+            hidden_layer_sizes=params['hidden_layer_sizes'],
+            activation=params['activation'],
+            alpha=params['alpha'],
+            learning_rate_init=params['learning_rate_init'],
             max_iter=1000,
             random_state=42
         )
-    elif model_type == "dt":
+    elif model_type == 'dt':
         model = DecisionTreeClassifier(
-            criterion=params["criterion"],
-            max_depth=params["max_depth"],
-            min_samples_split=int(params["min_samples_split"]),
-            min_samples_leaf=int(params["min_samples_leaf"]),
+            criterion=params['criterion'],
+            max_depth=params['max_depth'],
+            min_samples_split=int(params['min_samples_split']),
+            min_samples_leaf=int(params['min_samples_leaf']),
             random_state=42
         )
     else:
-        raise ValueError("Unknown model type")
+        raise ValueError('Unknown model type')
 
     cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
-    scores = cross_val_score(model, X_train, T_train, cv=cv, scoring="accuracy")
+    scores = cross_val_score(model, X_train, T_train, cv=cv, scoring='accuracy')
     acc = scores.mean()
 
-    return {"loss": -acc, "status": STATUS_OK, "params": params}
+    return {'loss': -acc, 'status': STATUS_OK, 'params': params}
 
 # --------------------------
 # Esegui Hyperopt su tutti i modelli
@@ -120,13 +120,13 @@ results = []
 best_models = {}
 
 for model_name, space in search_spaces.items():
-    print(f"\n=== Optimizing {model_name} with Hyperopt ===")
+    print(f'\n=== Optimizing {model_name} with Hyperopt ===')
     # --------------------------
     # Carica risultati feature selection
     # --------------------------
-    sequential_fs = load(os.path.join(base_path, 'results', f"sequential_fs_{model_name}.joblib"))
+    sequential_fs = load(os.path.join(base_path, 'results', f'sequential_fs_{model_name}.joblib'))
 
-    D = np.vstack([r["fs"] for r in sequential_fs])
+    D = np.vstack([r['fs'] for r in sequential_fs])
     s = np.sum(D, axis=0)
 
     # Ordina feature per importanza (decrescente)
@@ -142,7 +142,7 @@ for model_name, space in search_spaces.items():
         else:
             break
 
-    print("Selected features:", selected_features)
+    print('Selected features:', selected_features)
 
     X_train = trainset.iloc[:, selected_features].values
     T_train = trainset.iloc[:, -1].values - 1
@@ -159,63 +159,63 @@ for model_name, space in search_spaces.items():
         trials=trials,
         rstate=np.random.default_rng(42)
     )
-    best_trial = min(trials.results, key=lambda x: x["loss"])
-    acc = -best_trial["loss"]
-    params = best_trial["params"]
+    best_trial = min(trials.results, key=lambda x: x['loss'])
+    acc = -best_trial['loss']
+    params = best_trial['params']
 
-    print(f"Best {model_name} accuracy = {acc:.4f}")
-    print(f"Params = {params}")
+    print(f'Best {model_name} accuracy = {acc:.4f}')
+    print(f'Params = {params}')
 
-    results.append({"model": model_name, "mean_accuracy": acc, "best_params": params})
+    results.append({'model': model_name, 'mean_accuracy': acc, 'best_params': params})
     best_models[model_name] = params
 
 
 cv_df = pd.DataFrame([{
-    "model": r["model"],
-    "best_params": r["best_params"],
-    "mean_accuracy": r["mean_accuracy"]
+    'model': r['model'],
+    'best_params': r['best_params'],
+    'mean_accuracy': r['mean_accuracy']
 } for r in results])
 
-cv_df.to_csv(os.path.join(base_path, 'results', "hp_results.csv"), index=False)
+cv_df.to_csv(os.path.join(base_path, 'results', 'hp_results.csv'), index=False)
 
 # --------------------------
 # Seleziona best model globale
 # --------------------------
-best = max(results, key=lambda r: r["mean_accuracy"])
-best_model_name = best["model"]
-best_params = best["best_params"]
+best = max(results, key=lambda r: r['mean_accuracy'])
+best_model_name = best['model']
+best_params = best['best_params']
 print(f"\nBest model overall: {best_model_name} with accuracy {best['mean_accuracy']:.4f}")
 
 # Ricostruisci best_model con parametri trovati
 _ = objective(best_params)  # per rigenerare model identico
-if best_params["model"] == "svm":
+if best_params['model'] == 'svm':
     best_model = SVC(
-        C=best_params["C"],
-        kernel=best_params["kernel"],
-        gamma=best_params["gamma"],
-        degree=int(best_params["degree"])
+        C=best_params['C'],
+        kernel=best_params['kernel'],
+        gamma=best_params['gamma'],
+        degree=int(best_params['degree'])
     )
-elif best_params["model"] == "knn":
+elif best_params['model'] == 'knn':
     best_model = KNeighborsClassifier(
-        n_neighbors=int(best_params["n_neighbors"]),
-        weights=best_params["weights"],
-        p=best_params["p"]
+        n_neighbors=int(best_params['n_neighbors']),
+        weights=best_params['weights'],
+        p=best_params['p']
     )
-# elif best_params["model"] == "mlp":
+# elif best_params['model'] == 'mlp':
 #     best_model = MLPClassifier(
-#         hidden_layer_sizes=best_params["hidden_layer_sizes"],
-#         activation=best_params["activation"],
-#         alpha=best_params["alpha"],
-#         learning_rate_init=best_params["learning_rate_init"],
+#         hidden_layer_sizes=best_params['hidden_layer_sizes'],
+#         activation=best_params['activation'],
+#         alpha=best_params['alpha'],
+#         learning_rate_init=best_params['learning_rate_init'],
 #         max_iter=1000,
 #         random_state=42
 #     )
-elif best_params["model"] == "dt":
+elif best_params['model'] == 'dt':
     best_model = DecisionTreeClassifier(
-        criterion=best_params["criterion"],
-        max_depth=best_params["max_depth"],
-        min_samples_split=int(best_params["min_samples_split"]),
-        min_samples_leaf=int(best_params["min_samples_leaf"]),
+        criterion=best_params['criterion'],
+        max_depth=best_params['max_depth'],
+        min_samples_split=int(best_params['min_samples_split']),
+        min_samples_leaf=int(best_params['min_samples_leaf']),
         random_state=42
     )
 
@@ -223,22 +223,22 @@ elif best_params["model"] == "dt":
 # Train e salva modello
 # --------------------------
 best_model.fit(X_train, T_train)
-dump(best_model, os.path.join(base_path, "results", "best_model.pth"))
+dump(best_model, os.path.join(base_path, 'results', 'best_model.pth'))
 
-best_model = load(os.path.join(base_path, "results", "best_model.pth"))
+best_model = load(os.path.join(base_path, 'results', 'best_model.pth'))
 # --------------------------
 # Test su set di test
 # --------------------------
 y_score = best_model.predict_proba(X_test)
 y_pred = np.argmax(y_score, axis=-1)
 test_acc = accuracy_score(T_test, y_pred)
-print(f"Test accuracy = {test_acc:.4f}")
+print(f'Test accuracy = {test_acc:.4f}')
 
 fig, ax = plt.subplots(1, 1, figsize=(5, 5))
 
 cm = confusion_matrix(T_test, y_pred)
 conf_mat.plot_confusion_matrix(ax, cm, ['a', 'b', 'c', 'd', 'e', 'f'], fontsize=10)
-ax.set_title(f"Confusion Matrix ({best_model_name})")
+ax.set_title(f'Confusion Matrix ({best_model_name})')
 fig.tight_layout()
 plt.draw()
 fig.savefig(os.path.join(base_dir, 'fig', f'cm_{best_model_name}.png'))
@@ -279,5 +279,5 @@ plt.close(fig)
 # --------------------------
 # Reload model example
 # --------------------------
-reloaded_model = load(os.path.join(base_path, "results", "best_model.pth"))
-print("Reloaded model type:", type(reloaded_model))
+reloaded_model = load(os.path.join(base_path, 'results', 'best_model.pth'))
+print('Reloaded model type:', type(reloaded_model))

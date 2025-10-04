@@ -18,71 +18,7 @@ from YDLidar import YDLidar
 from constants import *
 
 
-exec(open(os.path.abspath(os.path.join(__file__, '..', '..', '..', 'remove_hidden_items.py'))).read())
-
-
-# Init model and feature
-# --------------------------
-def init_model():
-    global model, selected_features
-    model = load(os.path.abspath(os.path.join(__file__, '..', 'processing', 'results', 'best_model.pth')))
-    sequential_fs = load(os.path.join(__file__, '..', 'processing', 'results', f"sequential_fs_{model.__class__.__name__}.joblib"))
-
-    D = np.vstack([r["fs"] for r in sequential_fs])
-    s = np.sum(D, axis=0)
-
-    sorted_idx = np.argsort(s)[::-1]
-    selected_features = sorted_idx[:5].tolist()
-    for i in range(5, len(sorted_idx)):
-        if s[sorted_idx[i]] >= s[sorted_idx[i-1]] / 2:
-            selected_features.append(sorted_idx[i])
-        else:
-            break
-
-
-# --------------------------
-# Preprocess LiDAR signal
-# --------------------------
-def preprocess(angles, ranges):
-    angles %= (2 * np.pi)
-    mask = (angles >= MIN_ANGLE_RAD) & (angles <= MAX_ANGLE_RAD)
-    ranges = ranges[mask]
-    mask = (ranges > 0) & (ranges < 1.5)
-    ranges = ranges[mask]
-
-    ranges = ranges - ranges.min()
-    return np.array(ranges)
-
-
-# --------------------------
-# Compute features from preprocessed LiDAR signal
-# --------------------------
-def compute_features(ranges, selected_features):
-    global selected_features
-    peaks, _ = find_peaks(range_vals)
-    peak_vals = range_vals[peaks] if len(peaks) > 0 else np.array([np.nan])
-    feat = [
-        np.mean(range_vals),
-        gmean(range_vals),
-        hmean(range_vals),
-        trim_mean(range_vals, 0.2),
-        np.max(range_vals),
-        np.min(range_vals),
-        np.std(range_vals),
-        np.var(range_vals),
-        mode(range_vals, keepdims=False).mode,
-        np.median(range_vals),
-        kurtosis(range_vals),
-        skew(range_vals),
-        np.ptp(range_vals),
-        np.ptp(range_vals) / np.sqrt(np.mean(range_vals**2)),
-        np.sqrt(np.mean(range_vals**2)),
-        np.sqrt(np.sum(range_vals**2)),
-        len(peaks),
-        np.nanmean(peak_vals)
-    ]
-    feat = feat[selected_features]
-    return np.array(feat).reshape(1, -1)
+exec(open(os.path.abspath(os.path.join(__file__, '..', '..', 'remove_hidden_items.py'))).read())
 
 
 # Init polar plot
@@ -105,33 +41,35 @@ def init_plot():
 	lidar_plot.set_yticks([])
 
 
+# Preprocess LiDAR signal
+def preprocess(angles, ranges):
+	angles = angles * 180.0 / np.pi
+	mask = (
+		(angles >= MIN_ANGLE_DEG) & (angles <= MAX_ANGLE_DEG) &
+		(ranges > 0) & (ranges < 1.5)
+	)
+
+	return mask
+
+
 # Write data to csv file
-def write_csv(filename, angle, ran, intensity):
-	global model
-	mask = (angles >= MIN_ANGLE_RAD) & (angles <= MAX_ANGLE_RAD)
-    angles = angles[mask]
-    ranges = ranges[mask]
-    intensity = intensity[mask]
+def write_csv(timestamp, angles, ranges, intensity):
+	angles = np.array(angles)
+	ranges = np.array(ranges)
+	intensity = np.array(intensity)
 
-	mask = (ranges > 0) & (ranges < 1.5)
+	mask = preprocess(angles, ranges)
 	angles = angles[mask]
-    ranges = ranges[mask] 
-    intensity = intensity[mask]
+	ranges = ranges[mask]
+	intensity = intensity[mask]
 
-    angles = angles * 180.0 / np.pi
-    sorted_idx = np.argsort(angles)
+	df = pd.DataFrame({
+		'Angle': angles,
+		'Range': ranges,
+		'Intensity': intensity,
+	})
 
-    angles = angles[sorted_idx]
-    ranges = ranges[sorted_idx]
-    intensity = intensity[sorted_idx]
-
-    # ranges = preprocess(angles, ranges)
-    features = compute_features(ranges)
-    pred = model.predict(features)
-    record_label.after(0, lambda: record_label.config(text=f"Position: {pred:1d}"))
-
-    df = pd.DataFrame({'Angle': angles, 'Range': ranges, 'Intensity': intensity, 'Pred': pred})
-    df.to_csv(os.path.join(data_path, f"{filename}.csv"), index=False)
+	df.to_csv(os.path.join(data_path, f'{timestamp}.csv'), header=True, index=False)
 
 
 # Plot data in real-time
@@ -145,18 +83,16 @@ def animate(num):
 		lidar.scan_task()
 			
 		init_plot()
-		lidar_plot.scatter(lidar.angle, lidar.range, c='k', cmap='hsv', alpha=0.95)
+		lidar_plot.scatter(lidar.angle, lidar.range, c=lidar.intensity, cmap='hsv', alpha=0.95)
 
 		#if (1.0 / lidar.scan.config.scan_time) >= 4.0 and lidar.scan.points.size() < 1000:
 		if record_button['text'] == 'No record':
-			if num_record > 0:
-
-				thread = Thread(target=write_csv,
-								args=(lidar.scan.stamp, lidar.angle, lidar.range, lidar.intensity))
-				thread.start()
+			thread = Thread(target=write_csv,
+							args=(lidar.scan.stamp, lidar.angle, lidar.range, lidar.intensity))
+			thread.start()
 
 			num_record = num_record + 1
-			# record_label['text'] = num_record				
+			record_label['text'] = num_record				
 	else:
 		if thread is not None:
 			thread.join()
@@ -166,12 +102,20 @@ def animate(num):
 		anim = None
 
 		lidar.turnOff()
+		# lidar = None
 		init_plot()
 
 		num_record = 0
 
 	# end_time = time.time()
 	# print(f'Elapsed time: {end_time - start_time} seconds')
+
+
+# Start real-time plot
+def start_animation():
+	global anim, interval
+	anim = animation.FuncAnimation(fig, animate, interval=1000, cache_frame_data=False)
+	canvas.draw()
 
 
 # Streaming data
@@ -181,12 +125,11 @@ def start():
 	if start_button['text'] == 'Start':
 		start_button['text'] = 'Stop'
 
-		lidar = YDLidar()
+		if lidar is None:
+			lidar = YDLidar()
 
 		if lidar.turnOn():
-			interval = (1.0 / FREQUENCY) * 1000.0
-			anim = animation.FuncAnimation(fig, animate, interval=interval)
-			canvas.draw()
+			window.after(500, start_animation)
 		else:
 			start_button['text'] = 'Start'
 	else:
@@ -197,7 +140,7 @@ def start():
 
 # Record data
 def record():
-	global thread, filename, num_record
+	global thread, num_record
 
 	if start_button['text'] == 'Stop':
 		if record_button['text'] == 'Record':
@@ -212,7 +155,6 @@ def record():
 				thread.join()
 				thread = None
 
-			# filename = None
 			num_record = 0
 			record_button['text'] = 'Record'
 			record_label['text'] = ''
@@ -243,8 +185,7 @@ def center(window):
 def initGUI():
 
 	global window, fig, lidar_plot, canvas, start_button, record_button, record_label
-	init_model()
-
+																																														  
 	window_width = 600
 	window_height = 600
 
@@ -281,22 +222,13 @@ def initGUI():
 	window.mainloop()
 
 
+data_path = os.path.abspath(os.path.join(__file__, '..', '..', 'data'))
 
 if __name__ == '__main__':
-
-	data_path = os.path.abspath(os.path.join(__file__, '..', 'demo'))
-
-	MIN_ANGLE_RAD = MIN_ANGLE_DEG * np.pi / 180.0
-	MAX_ANGLE_RAD = MAX_ANGLE_DEG * np.pi / 180.0
-
-	lidar = None
-	anim = None
-	thread = None
-	num_record = 0
 
 	initGUI()
 
 	# Clear the __pycache__ folder
-	if os.path.exists(os.path.abspath(__file__ + '/../__pycache__')):
+	if os.path.exists(os.path.abspath(os.path.join(__file__, '..', '__pycache__'))):
 		import shutil
-		shutil.rmtree(os.path.abspath(__file__ + '/../__pycache__'))
+		shutil.rmtree(os.path.abspath(os.path.join(__file__, '..', '__pycache__')))

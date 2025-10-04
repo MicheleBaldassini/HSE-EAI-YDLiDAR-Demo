@@ -28,23 +28,23 @@ for d in dirs:
     subdirs = [s for s in os.listdir(subdir_path) if os.path.isdir(os.path.join(subdir_path, s))]
 
     for s in subdirs:
-        files = [f for f in os.listdir(os.path.join(subdir_path, s)) if f.endswith(".csv")]
+        files = [f for f in os.listdir(os.path.join(subdir_path, s)) if f.endswith('.csv')]
 
         for file in files:
             filepath = os.path.join(subdir_path, s, file)
             data = pd.read_csv(filepath)
 
-            data = data[(data["Angle"] >= 135) & (data["Angle"] <= 225)]
-            data = data[(data["Range"] > 0) & (data["Range"] < 1.5)]
+            data = data[(data['Angle'] >= 135) & (data['Angle'] <= 225)]
+            data = data[(data['Range'] > 0) & (data['Range'] < 1.5)]
 
             if len(data) < minSamples:
                 minSamples = len(data)
 
-            minDist = data["Range"].min()
+            minDist = data['Range'].min()
             if minDist < minDistance:
                 minDistance = minDist
 
-print(f"Min samples: {minSamples}")
+print(f'Min samples: {minSamples}')
 
 # --------------------------
 # Compute features
@@ -57,19 +57,19 @@ for i, d in enumerate(dirs, start=1):
     subdirs = [s for s in os.listdir(subdir_path) if os.path.isdir(os.path.join(subdir_path, s))]
 
     for j, s in enumerate(subdirs, start=1):
-        files = [f for f in os.listdir(os.path.join(subdir_path, s)) if f.endswith(".csv")]
+        files = [f for f in os.listdir(os.path.join(subdir_path, s)) if f.endswith('.csv')]
 
         for file in files:
             filepath = os.path.join(subdir_path, s, file)
             data = pd.read_csv(filepath)
 
             # Preprocessing
-            data = data[(data["Angle"] >= 135) & (data["Angle"] <= 225)]
-            data = data[(data["Range"] > 0) & (data["Range"] < 1.5)]
+            data = data[(data['Angle'] >= 135) & (data['Angle'] <= 225)]
+            data = data[(data['Range'] > 0) & (data['Range'] < 1.5)]
 
             # Translate all distance values at 0.5 metres
-            offset = data["Range"].min() - minDistance
-            range_vals = data["Range"].values - offset
+            offset = data['Range'].min() - minDistance
+            range_vals = data['Range'].values - offset
 
             # Features
             peaks, _ = find_peaks(range_vals)
@@ -101,37 +101,37 @@ for i, d in enumerate(dirs, start=1):
             targets.append(j)
 
 variableNames = [
-    "mean", "geomean", "harmmean", "trimmean",
-    "max", "min", "std",
-    "var", "mode", "median",
-    "kurtosis", "skewness", "peak2peak",
-    "peak2rms", "rms", "rssq",
-    "num_maxima", "mean_maxima",
-    "targets"
+    'mean', 'geomean', 'harmmean', 'trimmean',
+    'max', 'min', 'std',
+    'var', 'mode', 'median',
+    'kurtosis', 'skewness', 'peak2peak',
+    'peak2rms', 'rms', 'rssq',
+    'num_maxima', 'mean_maxima',
+    'targets'
 ]
 
 dataset = pd.DataFrame(np.column_stack([features, targets]), columns=variableNames)
 
 os.makedirs(os.path.join(base_path, 'dataset'), exist_ok=True)
-dataset.to_csv(os.path.join(base_path, 'dataset', "dataset_raw.csv"), index=False)
+dataset.to_csv(os.path.join(base_path, 'dataset', 'dataset_raw.csv'), index=False)
 
 # --------------------------
 # Clean dataset
 # --------------------------
-dataset = pd.read_csv(os.path.join(base_path, 'dataset', "dataset_raw.csv"))
+dataset = pd.read_csv(os.path.join(base_path, 'dataset', 'dataset_raw.csv'))
 features = dataset.iloc[:, :-1]
 targets = dataset.iloc[:, -1]
 
 # Remove rows with NaN
 rowsWithMissing = features.isna().sum(axis=1)
-print(f"Dataset rows with NaN = {np.sum(rowsWithMissing > 0)}")
+print(f'Dataset rows with NaN = {np.sum(rowsWithMissing > 0)}')
 print(np.where(rowsWithMissing > 0))
 features = features[rowsWithMissing == 0]
 targets = targets[rowsWithMissing == 0]
 
 # Remove columns with NaN
 colsWithMissing = features.isna().sum(axis=0)
-print(f"Dataset cols with NaN = {np.sum(colsWithMissing > 0)}")
+print(f'Dataset cols with NaN = {np.sum(colsWithMissing > 0)}')
 features = features.loc[:, colsWithMissing == 0]
 
 # Remove rows with all zeros
