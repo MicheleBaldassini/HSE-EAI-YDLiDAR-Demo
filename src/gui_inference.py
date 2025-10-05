@@ -178,7 +178,7 @@ def update_timeline():
 
 	timeline_plot.scatter(times, preds, c=colors, alpha=0.7)
 	timeline_plot.set_xticks(times)
-	timeline_plot.set_xticklabels([t.strftime('%H:%M:%S') for t in times], rotation=45, ha='right')
+	timeline_plot.set_xticklabels([t.strftime('%H:%M:%S') for t in times], fontsize=18, fontweight='bold', rotation=45, ha='right')
 
 	canvas_timeline.draw()
 
