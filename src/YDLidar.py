@@ -15,6 +15,7 @@ class YDLidar(object):
         #       port = value;
 
         self.laser = ydlidar.CYdLidar()
+        self.scan = ydlidar.LaserScan()
 
         self.laser.setlidaropt(ydlidar.LidarPropSerialPort, port)
         self.laser.setlidaropt(ydlidar.LidarPropSerialBaudrate, BAUDRATE)
@@ -48,7 +49,6 @@ class YDLidar(object):
             self.laser.turnOff()
             self.laser.disconnecting()
             return False
-        self.scan = ydlidar.LaserScan()
 
         return True
 

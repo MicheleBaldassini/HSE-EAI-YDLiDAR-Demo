@@ -18,7 +18,8 @@ from scipy.stats import gmean, hmean, trim_mean, mode, kurtosis, skew
 from YDLidar import YDLidar
 from constants import *
 
-exec(open(os.path.abspath(os.path.join(__file__, '..', 'remove_hidden_items.py'))).read())
+
+exec(open(os.path.abspath(os.path.join(__file__, '..', '..', 'remove_hidden_items.py'))).read())
 
 
 # --- GLOBAL DATA ---
@@ -67,8 +68,8 @@ def init_timeline():
 # Init model and feature
 def init_model():
 	global model, selected_features
-	model = load(os.path.abspath(os.path.join(__file__, '..', 'processing', 'results', 'best_model.pth')))
-	sequential_fs = load(os.path.abspath(os.path.join(__file__, '..', 'processing', 'results', f'sequential_fs_{model.__class__.__name__}.joblib')))
+	model = load(os.path.abspath(os.path.join(__file__, '..', '..',  'processing', 'results', 'best_model.pth')))
+	sequential_fs = load(os.path.abspath(os.path.join(__file__, '..', '..', 'processing', 'results', f'sequential_fs_{model.__class__.__name__}.joblib')))
 
 	D = np.vstack([r['fs'] for r in sequential_fs])
 	s = np.sum(D, axis=0)
@@ -203,8 +204,8 @@ def animate(num):
 
 		lidar.turnOff()
 		init_plot()
-		init_timeline()
 		timeline_data.clear()
+		init_timeline()
 
 
 # Start real-time plot
