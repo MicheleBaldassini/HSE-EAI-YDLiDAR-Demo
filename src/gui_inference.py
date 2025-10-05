@@ -47,22 +47,23 @@ def init_plot():
 
 
 def init_timeline():
-	timeline_plot.clear()
+    timeline_plot.clear()
 
-	timeline_plot.set_xticks([])
-	timeline_plot.set_xticklabels([])
+    timeline_plot.set_xticks([])
+    timeline_plot.set_xticklabels([])
 
-	timeline_plot.set_ylim(-0.5, 5.5)
-	timeline_plot.set_yticks(range(6))
-	timeline_plot.set_yticklabels([labels_map[i] for i in range(6)])
-	for tick, i in zip(timeline_plot.get_yticklabels(), range(6)):
-		tick.set_color(color_map[i])
-	timeline_plot.set_title('Timeline')
-	timeline_plot.set_xlabel('Time')
-	timeline_plot.set_ylabel('Position')
-	timeline_plot.figure.autofmt_xdate()
+    timeline_plot.set_ylim(-0.5, 5.5)
+    timeline_plot.set_yticks(range(6))
+    timeline_plot.set_yticklabels([labels_map[i] for i in range(6)], fontsize=18, fontweight='bold')
+    for tick, i in zip(timeline_plot.get_yticklabels(), range(6)):
+        tick.set_color(color_map[i])
 
-	canvas_timeline.draw()
+    timeline_plot.set_title('Timeline', fontsize=18, fontweight='bold')
+    timeline_plot.set_xlabel('Time', fontsize=18)
+    timeline_plot.set_ylabel('Position', fontsize=18)
+    timeline_plot.figure.autofmt_xdate()
+
+    canvas_timeline.draw()
 
 
 # Init model and feature
@@ -262,15 +263,15 @@ def initGUI():
 
 	init_model()
 
-	window_width = 1000
-	window_height = 600
+	window_width = 1600
+	window_height = 900
 
 	window = tk.Tk()
 	window.minsize(window_width, window_height)
 	window.title('LiDAR Monitor')
 
 	# --- LiDAR polar plot ---
-	fig = Figure(figsize=(6, 6), dpi=100)
+	fig = Figure(figsize=(10, 10), dpi=100)
 	lidar_plot = fig.add_subplot(projection='polar')
 	init_plot()
 	canvas = FigureCanvasTkAgg(fig, master=window)
@@ -278,7 +279,7 @@ def initGUI():
 	canvas.get_tk_widget().place(relx=0.0, rely=0.15, relwidth=0.5, relheight=0.8)
 
 	# --- Timeline plot ---
-	fig_timeline = Figure(figsize=(6, 6), dpi=100)
+	fig_timeline = Figure(figsize=(10, 10), dpi=100)
 	timeline_plot = fig_timeline.add_subplot(111)
 	
 	canvas_timeline = FigureCanvasTkAgg(fig_timeline, master=window)
@@ -286,13 +287,13 @@ def initGUI():
 	canvas_timeline.get_tk_widget().place(relx=0.5, rely=0.15, relwidth=0.5, relheight=0.8)
 
 	# Start/Stop
-	start_button = tk.Button(master=window, text='Start', command=start, bg='white')
-	start_button.place(relx=0.2, rely=0.05, relwidth=0.125, relheight=0.05)
-
+	start_button = tk.Button(master=window, text='Start', command=start, bg='white', font=('Arial', 18, 'bold'))
+	start_button.place(relx=0.25-0.0625, rely=0.08, relwidth=0.125, relheight=0.06)
+	
 	# Label prediction
-	inference_label = tk.Label(master=window, text='Position: -', anchor='w', bg='white')
-	inference_label.place(relx=0.4, rely=0.05, relwidth=0.25, relheight=0.05)
-
+	inference_label = tk.Label(master=window, text='Position: -', anchor='center', bg='white', font=('Arial', 18, 'bold'))
+	inference_label.place(relx=0.75-0.125, rely=0.08, relwidth=0.25, relheight=0.06)
+	
 	window.configure(background='white')
 	center(window)
 	window.mainloop()
