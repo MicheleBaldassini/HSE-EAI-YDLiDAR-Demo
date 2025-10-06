@@ -123,6 +123,7 @@ def compute_features(range_vals):
 
 # Process data and predict position
 def process_data(timestamp, angles, ranges, intensity):
+	global inference_label
 	angles = np.array(angles)
 	ranges = np.array(ranges)
 	intensity = np.array(intensity)
@@ -133,6 +134,7 @@ def process_data(timestamp, angles, ranges, intensity):
 	intensity = intensity[mask]
 
 	if len(ranges) < 30:
+		inference_label['text'] = 'Position: -'
 		return
 
 	features = compute_features(ranges)
@@ -181,7 +183,8 @@ def update_timeline():
     max_points = 10
     n_points = len(timeline_data)
 
-    x_positions = list(range(max_points - n_points, max_points))
+    # x_positions = list(range(max_points - n_points, max_points))
+    x_positions = list(range(n_points))
 
     preds = [p for _, p in timeline_data]
     colors = [color_map[p] for p in preds]
@@ -191,7 +194,8 @@ def update_timeline():
 
     timeline_plot.set_xlim(-0.5, 9.5)
 
-    ticks_to_show = list(range(max_points - n_points, max_points))
+    # ticks_to_show = list(range(max_points - n_points, max_points))
+    ticks_to_show = list(range(n_points))
     timeline_plot.set_xticks(ticks_to_show)
     timeline_plot.set_xticklabels(times, fontsize=14, fontweight='bold', rotation=45, ha='right')
 
@@ -236,7 +240,7 @@ def start_animation():
 
 # Streaming data
 def start():
-	global lidar
+	global lidar, inference_label
 	if start_button['text'] == 'Start':
 		start_button['text'] = 'Stop'
 		if lidar is None:
