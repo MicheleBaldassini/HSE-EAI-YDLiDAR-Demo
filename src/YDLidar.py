@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-import numpy as np
-import ydlidar
-
+import os
 import platform
 import subprocess
+import numpy as np
+import ydlidar
 
 from constants import *
 
