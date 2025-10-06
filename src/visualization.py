@@ -18,6 +18,8 @@ for file in glob.glob(os.path.join(data_path, '*.csv')):
     ts_raw = int(filename)
     ts_sec = ts_raw // 1_000_000_000
     ts_dt = datetime.fromtimestamp(ts_sec)
+    ts_dt = ts_dt - timedelta(days=(ts_dt.year - 2025) * 365.25 - 3)
+    ts_dt = ts_dt + timedelta(hours=6)
 
     records.append((ts_dt, pred))
 
@@ -62,6 +64,7 @@ for tick, cls in zip(ax[0].get_yticklabels(), present_classes):
     tick.set_color(color_map[cls])
 
 ax[0].set_ylabel('Posizione (Pred)', fontsize=16)
+ax[0].set_xlabel('Time', fontsize=16)
 ax[0].set_title('Timeline delle posizioni', fontsize=18)
 
 # --- Etichette X ad intervalli di tempo ---
