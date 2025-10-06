@@ -74,7 +74,7 @@ def write_csv(timestamp, angles, ranges, intensity):
 
 # Plot data in real-time
 def animate(num):
-	global lidar, anim, thread, num_record
+	global anim, thread, num_record
 
 	# start_time = time.time()
 
@@ -113,14 +113,14 @@ def animate(num):
 
 # Start real-time plot
 def start_animation():
-	global anim, interval
-	anim = animation.FuncAnimation(fig, animate, interval=1000, cache_frame_data=False)
+	global anim
+	anim = animation.FuncAnimation(fig, animate, interval=interval, cache_frame_data=False)
 	canvas.draw()
 
 
 # Streaming data
 def start():
-	global lidar, anim
+	global lidar
 
 	if start_button['text'] == 'Start':
 		start_button['text'] = 'Stop'

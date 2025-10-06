@@ -2,17 +2,27 @@
 import numpy as np
 import ydlidar
 
+import platform
+import subprocess
+
 from constants import *
 
 
 class YDLidar(object):
 
     def __init__(self):
-        # global port
-        # if port == None:
-        #   ports = ydlidar.lidarPortList()
-        #   for key, value in ports.items():
-        #       port = value;
+        ports = ydlidar.lidarPortList()
+        for key, value in ports.items():
+            port = value
+
+        if platform.system() == 'Linux' and os.path.exists(port):
+            st_mode = os.stat(port).st_mode
+            perms = oct(st_mode & 0o777)[2:]
+            if perms != '777':
+                try:
+                    subprocess.run(['sudo', 'chmod', '777', port], check=True)
+                except subprocess.CalledProcessError:
+                    print(f'[WARNING] Cannot change permissions for {port}. Try running with sudo.')
 
         self.laser = ydlidar.CYdLidar()
         self.scan = ydlidar.LaserScan()

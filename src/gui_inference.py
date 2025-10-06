@@ -47,23 +47,22 @@ def init_plot():
 
 
 def init_timeline():
-    timeline_plot.clear()
+	timeline_plot.clear()
 
-    timeline_plot.set_xticks([])
-    timeline_plot.set_xticklabels([])
+	timeline_plot.set_xticks([])
+	timeline_plot.set_xticklabels([])
 
-    timeline_plot.set_ylim(-0.5, 5.5)
-    timeline_plot.set_yticks(range(6))
-    timeline_plot.set_yticklabels([labels_map[i] for i in range(6)], fontsize=18, fontweight='bold')
-    for tick, i in zip(timeline_plot.get_yticklabels(), range(6)):
-        tick.set_color(color_map[i])
+	timeline_plot.set_ylim(-0.5, 5.5)
+	timeline_plot.set_yticks(range(6))
+	timeline_plot.set_yticklabels([labels_map[i] for i in range(6)], fontsize=18, fontweight='bold')
+	for tick, i in zip(timeline_plot.get_yticklabels(), range(6)):
+		tick.set_color(color_map[i])
 
-    timeline_plot.set_title('Timeline', fontsize=18, fontweight='bold')
-    timeline_plot.set_xlabel('Time', fontsize=18)
-    timeline_plot.set_ylabel('Position', fontsize=18)
-    timeline_plot.figure.autofmt_xdate()
-
-    canvas_timeline.draw()
+	timeline_plot.set_title('Timeline', fontsize=18, fontweight='bold')
+	timeline_plot.set_xlabel('Time', fontsize=18)
+	timeline_plot.set_ylabel('Position', fontsize=18)
+	timeline_plot.figure.autofmt_xdate()
+	canvas_timeline.draw()
 
 
 # Init model and feature
@@ -97,7 +96,6 @@ def preprocess(angles, ranges):
 
 # Compute features from preprocessed LiDAR signal
 def compute_features(range_vals):
-	# global selected_features
 	peaks, _ = find_peaks(range_vals)
 	feat = [
 		np.mean(range_vals),
@@ -125,8 +123,6 @@ def compute_features(range_vals):
 
 # Process data and predict position
 def process_data(timestamp, angles, ranges, intensity):
-	# global model, timeline_data
-
 	angles = np.array(angles)
 	ranges = np.array(ranges)
 	intensity = np.array(intensity)
@@ -150,8 +146,6 @@ def process_data(timestamp, angles, ranges, intensity):
 
 # Update GUI in the main thread
 def update_gui(timestamp, pred):
-	global timeline_data
-
 	inference_label.config(text=f'Position: {labels_map[pred]}')
 
 	ts_raw = int(timestamp)
@@ -166,26 +160,47 @@ def update_gui(timestamp, pred):
 
 
 # Timeline update
+# def update_timeline():
+# 	init_timeline()
+
+# 	times = [t for t, _ in timeline_data]
+# 	preds = [p for _, p in timeline_data]
+# 	colors = [color_map[p] for p in preds]
+
+# 	timeline_plot.scatter(times, preds, c=colors, alpha=0.7)
+# 	timeline_plot.set_xticks(times)
+# 	timeline_plot.set_xticklabels([t.strftime('%H:%M:%S') for t in times], fontsize=18, fontweight='bold', rotation=45, ha='right')
+
+# 	if len(times) > 1:
+# 		timeline_plot.set_xlim(times[0], times[-1])
+
+# 	canvas_timeline.draw()
 def update_timeline():
-	init_timeline()
+    init_timeline()
 
-	if not timeline_data:
-		return
+    max_points = 10
+    n_points = len(timeline_data)
 
-	times = [t for t, _ in timeline_data]
-	preds = [p for _, p in timeline_data]
-	colors = [color_map[p] for p in preds]
+    x_positions = list(range(max_points - n_points, max_points))
 
-	timeline_plot.scatter(times, preds, c=colors, alpha=0.7)
-	timeline_plot.set_xticks(times)
-	timeline_plot.set_xticklabels([t.strftime('%H:%M:%S') for t in times], fontsize=18, fontweight='bold', rotation=45, ha='right')
+    preds = [p for _, p in timeline_data]
+    colors = [color_map[p] for p in preds]
+    times = [t.strftime('%H:%M:%S') for t, _ in timeline_data]
 
-	canvas_timeline.draw()
+    timeline_plot.scatter(x_positions, preds, c=colors, alpha=0.8, s=120)
+
+    timeline_plot.set_xlim(-0.5, 9.5)
+
+    ticks_to_show = list(range(max_points - n_points, max_points))
+    timeline_plot.set_xticks(ticks_to_show)
+    timeline_plot.set_xticklabels(times, fontsize=14, fontweight='bold', rotation=45, ha='right')
+
+    canvas_timeline.draw()
 
 
 # Animate loop
 def animate(num):
-	global lidar, anim, thread, timeline_data
+	global anim, thread
 
 	if start_button['text'] == 'Stop':
 		lidar.scan_task()
@@ -214,7 +229,7 @@ def start_animation():
 	global anim
 	if not os.path.exists(demo_path):
 		os.makedirs(demo_path)
-	anim = animation.FuncAnimation(fig, animate, interval=2000, cache_frame_data=False)
+	anim = animation.FuncAnimation(fig, animate, interval=1000, cache_frame_data=False)
 	canvas.draw()
 	canvas_timeline.draw()
 

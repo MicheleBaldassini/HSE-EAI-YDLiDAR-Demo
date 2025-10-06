@@ -6,7 +6,7 @@ import shutil
 def remove_hidden_items(folder):
     for root, dirs, files in os.walk(folder, topdown=False):
         for file in files:
-            if file.startswith('.') or file == '.DS_Store':
+            if file.startswith('._') or file == '.DS_Store':
                 file_path = os.path.join(root, file)
                 if os.path.isfile(file_path):
                     try:
@@ -16,7 +16,7 @@ def remove_hidden_items(folder):
                         print(f'Error removing file {file_path}: {e}')
 
         for dir in dirs:
-            if dir.startswith('.') or dir == '__pycache__':
+            if dir.startswith('._') or dir == '__pycache__':
                 dir_path = os.path.join(root, dir)
                 if os.path.isdir(dir_path):
                     try:
