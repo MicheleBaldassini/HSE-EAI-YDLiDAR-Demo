@@ -110,8 +110,7 @@ To launch the LiDAR:
 
 ## Contact 
 
-For more information, please contact:
-
+For more information, please contact:  
 ✉️ **[your.email@example.com](mailto:your.email@example.com)**
 
 ---
