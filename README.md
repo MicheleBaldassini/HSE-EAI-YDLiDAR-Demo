@@ -84,9 +84,8 @@ Replace `[vcpkgroot]` with the path of your `vcpkg` installation.
 
 ## Python Installation
 
-From the `YDLidar-SDK` root:
-
 ```powershell
+cd ..
 pip install .
 ```
 
