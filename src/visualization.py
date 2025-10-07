@@ -84,19 +84,40 @@ ax[0].set_title('Timeline delle posizioni', fontsize=18)
 # ax[0].set_xticklabels(xticklabels, rotation=45, ha='right', fontsize=14)
 # ax[0].tick_params(axis='y', labelsize=14)
 
-# --- Etichette X max ---
+# --- Etichette X in base al numero di campioni ---
+# num_samples = len(timeline_df)
+
+# possible_ticks = [4, 5, 6]
+
+# num_ticks = next((t for t in possible_ticks if num_samples % t == 0))
+
+# step = (num_samples - 1) // (num_ticks - 1)
+# xticks = list(range(0, num_samples, step))
+
+# xticklabels = [
+#     timeline_df['timestamp'].iloc[i].strftime('%d-%m-%Y %H:%M:%S')
+#     for i in xticks
+# ]
+
+# ax[0].set_xticks(xticks)
+# ax[0].set_xticklabels(xticklabels, rotation=45, ha='right', fontsize=14)
+# ax[0].set_xlim(-0.5, num_samples + 0.5)
+
+# --- 5 Etichette X ---
+num_samples = len(timeline_df)
 num_ticks = 5
-t_min = timeline_df['timestamp'].min()
-t_max = timeline_df['timestamp'].max()
+xticks = np.linspace(0, num_samples - 1, num_ticks)
 
-tick_times = [t_min + i * (t_max - t_min) / (num_ticks - 1) for i in range(num_ticks)]
+t_min = timeline_df['timestamp'].iloc[0]
+t_max = timeline_df['timestamp'].iloc[-1]
+tick_times = [t_min + (t_max - t_min) * (i / (num_ticks - 1)) for i in range(num_ticks)]
 
-xticks = list(range(0, num_ticks * 2, 2))
 xticklabels = [t.strftime('%d-%m-%Y %H:%M:%S') for t in tick_times]
 
-ax[0].set_xlim(-0.5, 9.5)
 ax[0].set_xticks(xticks)
 ax[0].set_xticklabels(xticklabels, rotation=45, ha='right', fontsize=14)
+ax[0].set_xlim(-0.5, num_samples - 0.5)
+
 
 # --- Pie chart ---
 wedges, texts, autotexts = ax[1].pie(
