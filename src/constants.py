@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # port = '/dev/ttyUSB0'
 
-model = 'X4'
+model = 'G2'
 
 if model == 'X4':
 	BAUDRATE = 128000
@@ -22,7 +22,7 @@ MAX_ANGLE_DEG = 225.0
 interval = int((1.0 / FREQUENCY) * 1000.0)
 lidar = None
 # anim = None
-# thread = None
+thread = None
 num_record = 0
 
 
